@@ -127,8 +127,9 @@ python stage1_basic_inference.py --model qwen7b --test_file Data/balance_960_tes
 
 ### Stage 2: Error Annotation
 
-**Input:** The output file from Stage 1 (e.g., `./outputs/qwen7b_960_output.jsonl`).  
-**What it does:** Identifies incorrect samples and annotates them with error types (PUE, CE, RE, CPE, COE, OE) and reasons.
+**Input:** Incorrect samples from Stage 1 that have been manually verified based on answer equivalence.
+
+**What it does:** Annotates the verified incorrect samples with error types (PUE, CE, RE, CPE, COE, OE) and corresponding error reasons.
 
 ```bash
 export DEEPSEEK_API_KEY="your-api-key"
@@ -137,6 +138,8 @@ python stage2_annotate_errors.py \
     --output_file Data/error_db.jsonl \
     --existing_label_file Data/partial_labels.jsonl   # optional
 ```
+
+Stage 2 does not perform answer correctness judgment. Correctness is determined during the Stage 1 evaluation procedure, where extracted answers are manually verified for mathematical equivalence; only verified incorrect samples are passed to Stage 2.
 
 ### Stage 3: EAP Experiments on 400 Samples
 
