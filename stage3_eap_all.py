@@ -264,9 +264,16 @@ def retrieve_topk_fusion(test_item, error_pool, k=3):
         sim_formula = jaccard_similarity(test_fp, err.get("fingerprint"))
         sim_errorcause = cosine_similarity(test_pred_emb, err.get("error_reason_embedding"))
 
-        # 有效相似度（非零？但原代码直接取全部，因为余弦可能为0，Jaccard可能为0）
-        # 按照原DeepSeek-Math fusion代码，直接取全部四个，即使为0也参与平均。
-        avg_sim = (sim_problem + sim_summary + sim_formula + sim_errorcause) / 4.0
+        # Fusion：有公式时使用四种相似度；无公式时排除 Formula，
+        # 与论文中的定义一致：无公式时仅对 Problem/Summary/ErrorCause 求平均。
+        if test_fp:
+            avg_sim = (
+                sim_problem + sim_summary + sim_formula + sim_errorcause
+            ) / 4.0
+        else:
+            avg_sim = (
+                sim_problem + sim_summary + sim_errorcause
+            ) / 3.0
         scores.append((avg_sim, err["error_type"], err["error_reason"]))
 
     scores.sort(key=lambda x: x[0], reverse=True)
